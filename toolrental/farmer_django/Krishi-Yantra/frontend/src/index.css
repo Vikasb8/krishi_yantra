@@ -1,0 +1,1091 @@
+/* Krishi-Yantra — theme overrides (loaded after Bootstrap) */
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&display=swap');
+
+:root {
+  --ky-primary: #15803d;
+  --ky-primary-dark: #166534;
+  --ky-primary-rgb: 21, 128, 61;
+  --ky-accent: #ca8a04;
+  --ky-surface: #ffffff;
+  --ky-bg: #f4f7f4;
+  --ky-bg-gradient: linear-gradient(165deg, #f8faf8 0%, #eef4ef 45%, #e8f0ea 100%);
+  --ky-text: #0f172a;
+  --ky-muted: #64748b;
+  --ky-radius: 0.75rem;
+  --ky-radius-lg: 1rem;
+  --ky-shadow: 0 1px 3px rgba(15, 23, 42, 0.06), 0 4px 12px rgba(15, 23, 42, 0.04);
+  --ky-shadow-hover: 0 8px 24px rgba(15, 23, 42, 0.08);
+  --bs-primary: var(--ky-primary);
+  --bs-primary-rgb: var(--ky-primary-rgb);
+  --bs-link-color: var(--ky-primary);
+  --bs-link-hover-color: var(--ky-primary-dark);
+}
+
+/* Bootswatch Morph ships blue --bs-primary; force Krishi green on primary buttons app-wide */
+.btn-primary {
+  --bs-btn-color: #fff;
+  --bs-btn-bg: var(--ky-primary);
+  --bs-btn-border-color: var(--ky-primary);
+  --bs-btn-hover-color: #fff;
+  --bs-btn-hover-bg: var(--ky-primary-dark);
+  --bs-btn-hover-border-color: var(--ky-primary-dark);
+  --bs-btn-focus-shadow-rgb: var(--ky-primary-rgb);
+  --bs-btn-active-color: #fff;
+  --bs-btn-active-bg: var(--ky-primary-dark);
+  --bs-btn-active-border-color: var(--ky-primary-dark);
+  --bs-btn-disabled-color: #fff;
+  --bs-btn-disabled-bg: var(--ky-primary);
+  --bs-btn-disabled-border-color: var(--ky-primary);
+}
+
+.btn-outline-primary {
+  --bs-btn-color: var(--ky-primary);
+  --bs-btn-border-color: var(--ky-primary);
+  --bs-btn-hover-color: #fff;
+  --bs-btn-hover-bg: var(--ky-primary);
+  --bs-btn-hover-border-color: var(--ky-primary);
+  --bs-btn-focus-shadow-rgb: var(--ky-primary-rgb);
+  --bs-btn-active-color: #fff;
+  --bs-btn-active-bg: var(--ky-primary-dark);
+  --bs-btn-active-border-color: var(--ky-primary-dark);
+  --bs-btn-disabled-color: var(--ky-primary);
+  --bs-btn-disabled-bg: transparent;
+  --bs-btn-disabled-border-color: var(--ky-primary);
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  font-family: 'DM Sans', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  font-size: 1rem;
+  line-height: 1.55;
+  color: var(--ky-text);
+  background: var(--ky-bg-gradient);
+  min-height: 100vh;
+  overflow-x: hidden; /* avoid horizontal scroll on small devices */
+  -webkit-font-smoothing: antialiased;
+}
+
+img {
+  max-width: 100%;
+  height: auto;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  color: var(--ky-text);
+}
+
+h3 {
+  padding: 0;
+}
+
+main {
+  min-height: calc(100vh - 8rem);
+  padding-bottom: 2rem;
+}
+
+main > .container {
+  max-width: 1140px;
+}
+
+/* Navbar */
+.ky-navbar {
+  background: var(--ky-surface) !important;
+  border-bottom: 1px solid rgba(15, 23, 42, 0.06);
+  box-shadow: var(--ky-shadow);
+  /* Let scaled-up logo paint outside a compact flex row */
+  overflow: visible;
+}
+
+.ky-navbar > .container {
+  overflow: visible;
+}
+
+.ky-navbar .navbar-brand {
+  font-weight: 700;
+  font-size: 1.25rem;
+  color: var(--ky-primary) !important;
+  letter-spacing: -0.03em;
+}
+
+/* Responsive navbar brand / logo */
+.ky-navbar .navbar-brand {
+  padding-top: 0;
+  padding-bottom: 0;
+  flex-shrink: 0;
+  max-width: 85vw; /* allow wider logo without increasing navbar height */
+}
+
+.ky-navbar-logo-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  width: auto;
+  max-width: 100%;
+  overflow: visible;
+}
+
+.ky-navbar-logo {
+  height: clamp(3.3rem, 6.2vw, 4.8rem);
+  width: auto;
+  max-width: 100%;
+  object-fit: contain;
+  object-position: left center;
+  display: block;
+  /* Widen logo visually without changing the navbar’s layout height */
+  transform: scale(1.3);
+  transform-origin: left center;
+}
+
+@media (min-width: 768px) {
+  .ky-navbar-logo {
+    height: clamp(3.7rem, 5.2vw, 5.3rem);
+    transform: scale(1.35);
+  }
+}
+
+@media (min-width: 992px) {
+  .ky-navbar-logo {
+    height: 5.9rem;
+    transform: scale(1.4);
+  }
+}
+
+@media (max-width: 991.98px) {
+  .ky-navbar .navbar-brand {
+    max-width: 78vw;
+  }
+}
+
+.ky-navbar .nav-link {
+  font-weight: 500;
+  color: var(--ky-text) !important;
+  border-radius: 0.5rem;
+  padding: 0.5rem 0.85rem !important;
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.ky-navbar .nav-link:hover {
+  background: rgba(var(--ky-primary-rgb), 0.08);
+  color: var(--ky-primary) !important;
+}
+
+.ky-navbar .dropdown-toggle::after {
+  margin-left: 0.35em;
+}
+
+/* Logout matches other nav links (button reset is in Bootstrap .nav-link) */
+.ky-navbar-nav .nav-link.btn {
+  border: none;
+  background: transparent;
+  width: auto;
+  text-align: left;
+}
+
+@media (max-width: 991.98px) {
+  .ky-navbar-nav {
+    padding-top: 0.5rem;
+    padding-bottom: 0.5rem;
+  }
+
+  .ky-navbar-nav .nav-item .nav-link {
+    max-width: 100%;
+  }
+}
+
+/* Footer */
+.app-footer {
+  margin-top: auto;
+  padding: 1.25rem 0;
+  background: var(--ky-surface);
+  border-top: 1px solid rgba(15, 23, 42, 0.06);
+  color: var(--ky-muted);
+  font-size: 0.9rem;
+}
+
+.app-footer .footer-inner {
+  text-align: center;
+}
+
+/* Home hero */
+.page-hero {
+  padding: 2rem 0 1.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.page-hero h1 {
+  font-size: clamp(1.75rem, 4vw, 2.25rem);
+  margin-bottom: 0.35rem;
+}
+
+.page-hero .lead {
+  color: var(--ky-muted);
+  font-size: 1.05rem;
+  margin-bottom: 0;
+  max-width: 36rem;
+}
+
+/* Cards — tool grid */
+.ky-card-tool {
+  border: none;
+  border-radius: var(--ky-radius-lg);
+  box-shadow: var(--ky-shadow);
+  overflow: hidden;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  background: var(--ky-surface);
+}
+
+.ky-card-tool:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--ky-shadow-hover);
+}
+
+.ky-card-tool .card-img-top {
+  height: 200px;
+  object-fit: cover;
+  background: linear-gradient(135deg, #e2e8f0 0%, #cbd5e1 100%);
+}
+
+.ky-card-tool .card-title a {
+  color: var(--ky-text);
+  text-decoration: none;
+  transition: color 0.15s ease;
+}
+
+.ky-card-tool .card-title a:hover {
+  color: var(--ky-primary);
+}
+
+.ky-card-tool .price-tag {
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: var(--ky-primary);
+  margin-top: 0.25rem;
+}
+
+/* Auth pages */
+.auth-wrap {
+  display: flex;
+  justify-content: center;
+  padding: 2rem 0 3rem;
+}
+
+.auth-card {
+  width: 100%;
+  max-width: 440px;
+  border: none;
+  border-radius: var(--ky-radius-lg);
+  box-shadow: var(--ky-shadow-hover);
+  background: var(--ky-surface);
+}
+
+.auth-card .card-body {
+  padding: 2rem;
+}
+
+.auth-card h1 {
+  font-size: 1.5rem;
+  margin-bottom: 1.25rem;
+}
+
+.auth-card .form-label {
+  font-weight: 500;
+  color: var(--ky-text);
+  margin-bottom: 0.35rem;
+}
+
+.auth-card .form-control {
+  border-radius: 0.5rem;
+  padding: 0.6rem 0.85rem;
+  border-color: #cbd5e1;
+}
+
+.auth-card .form-control:focus {
+  border-color: var(--ky-primary);
+  box-shadow: 0 0 0 0.2rem rgba(var(--ky-primary-rgb), 0.2);
+}
+
+/* Primary actions — same on auth forms and booking card */
+.auth-card .btn-primary,
+.ky-booking-card .btn-primary {
+  border-radius: 0.5rem;
+  padding: 0.55rem 1.25rem;
+  font-weight: 600;
+  width: 100%;
+}
+
+.auth-card .btn-primary {
+  margin-top: 0.5rem;
+}
+
+/* While dates are re-checked, stay full-strength (Bootstrap fades :disabled) */
+.ky-booking-card .btn-primary:disabled.ky-booking-submit--checking {
+  opacity: 1 !important;
+}
+
+.ky-booking-card .ky-book-now-btn.btn-lg {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  padding: 0.9rem 1.35rem;
+  min-height: 3.5rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  border-radius: var(--ky-radius);
+  box-shadow: 0 2px 8px rgba(var(--ky-primary-rgb), 0.25);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.ky-booking-card .ky-book-now-btn.btn-lg.ky-book-now-btn--stacked {
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.ky-booking-card .ky-book-now-btn.btn-lg:not(:disabled):hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(var(--ky-primary-rgb), 0.3);
+}
+
+.ky-booking-card .ky-book-now-btn .ky-book-now-btn__main {
+  display: inline-flex;
+  align-items: center;
+  font-size: 1.08rem;
+}
+
+.ky-booking-card .ky-book-now-btn .ky-book-now-btn__sub {
+  font-weight: 500;
+  letter-spacing: 0;
+}
+
+.auth-footer-link {
+  text-align: center;
+  margin-top: 1.25rem;
+  color: var(--ky-muted);
+}
+
+.auth-footer-link a {
+  font-weight: 600;
+}
+
+/* Tool detail — back navigation */
+.ky-back-nav {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.65rem;
+  padding: 0.5rem 1.15rem 0.5rem 0.55rem;
+  margin-bottom: 1.25rem;
+  border-radius: 999px;
+  background: var(--ky-surface);
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  box-shadow: var(--ky-shadow);
+  color: var(--ky-text);
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 0.9375rem;
+  letter-spacing: -0.01em;
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease,
+    border-color 0.2s ease,
+    color 0.2s ease,
+    background-color 0.2s ease;
+}
+
+.ky-back-nav:hover {
+  color: var(--ky-primary);
+  border-color: rgba(var(--ky-primary-rgb), 0.35);
+  background: rgba(var(--ky-primary-rgb), 0.04);
+  box-shadow: var(--ky-shadow-hover);
+  transform: translateY(-2px);
+}
+
+.ky-back-nav:active {
+  transform: translateY(0);
+  box-shadow: var(--ky-shadow);
+}
+
+.ky-back-nav:focus-visible {
+  outline: 2px solid var(--ky-primary);
+  outline-offset: 2px;
+}
+
+.ky-back-nav-icon {
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 50%;
+  background: rgba(var(--ky-primary-rgb), 0.12);
+  color: var(--ky-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.8rem;
+  transition: background-color 0.2s ease, transform 0.2s ease;
+  flex-shrink: 0;
+}
+
+.ky-back-nav:hover .ky-back-nav-icon {
+  background: rgba(var(--ky-primary-rgb), 0.2);
+}
+
+.ky-back-nav-text {
+  padding-right: 0.15rem;
+}
+
+.tool-detail-img {
+  border-radius: var(--ky-radius-lg);
+  box-shadow: var(--ky-shadow);
+  background: linear-gradient(135deg, #e2e8f0 0%, #cbd5e1 100%);
+}
+
+.tool-detail-img--placeholder {
+  min-height: 280px;
+  width: 100%;
+  aspect-ratio: 4 / 3;
+}
+
+.tool-detail-panel .list-group-item {
+  border: none;
+  padding-left: 0;
+  padding-right: 0;
+  background: transparent;
+}
+
+/* Detail page — cards aligned with home / auth */
+.ky-detail-card {
+  border: none;
+  border-radius: var(--ky-radius-lg);
+  box-shadow: var(--ky-shadow);
+  background: var(--ky-surface);
+  overflow: hidden;
+}
+
+.ky-detail-card--hero .card-body {
+  padding: 1.5rem 1.5rem 1.25rem;
+}
+
+.ky-section-title {
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ky-muted);
+  margin-bottom: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.ky-section-title i {
+  color: var(--ky-primary);
+  font-size: 0.95rem;
+  opacity: 0.9;
+}
+
+.ky-stat-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.75rem;
+  margin-top: 0.25rem;
+}
+
+@media (min-width: 576px) {
+  .ky-stat-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+.ky-stat-pill {
+  background: rgba(var(--ky-primary-rgb), 0.06);
+  border: 1px solid rgba(var(--ky-primary-rgb), 0.12);
+  border-radius: var(--ky-radius);
+  padding: 0.75rem 0.85rem;
+  min-height: 100%;
+}
+
+.ky-stat-pill .ky-stat-label {
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--ky-muted);
+  margin-bottom: 0.2rem;
+}
+
+.ky-stat-pill .ky-stat-value {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--ky-text);
+  line-height: 1.25;
+}
+
+.ky-stat-pill.ky-stat-pill--price .ky-stat-value {
+  color: var(--ky-primary);
+  font-size: 1.2rem;
+}
+
+.ky-about-card .card-body {
+  padding: 1.5rem;
+}
+
+.ky-about-text {
+  margin: 0;
+  color: var(--ky-text);
+  line-height: 1.7;
+  font-size: 0.98rem;
+}
+
+.ky-about-text + .ky-about-meta {
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid rgba(15, 23, 42, 0.06);
+}
+
+/* Booking card */
+.ky-booking-card {
+  border: none;
+  border-radius: var(--ky-radius-lg);
+  box-shadow: var(--ky-shadow);
+  overflow: hidden;
+  background: var(--ky-surface);
+}
+
+.ky-booking-card .card-body {
+  padding: 1.5rem;
+}
+
+.ky-booking-head {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  padding: 1.35rem 1.5rem 1rem;
+  background: linear-gradient(
+    135deg,
+    rgba(var(--ky-primary-rgb), 0.09) 0%,
+    rgba(var(--ky-primary-rgb), 0.03) 50%,
+    var(--ky-surface) 100%
+  );
+  border-bottom: 1px solid rgba(15, 23, 42, 0.06);
+}
+
+.ky-booking-head-icon {
+  width: 2.75rem;
+  height: 2.75rem;
+  border-radius: var(--ky-radius);
+  background: rgba(var(--ky-primary-rgb), 0.15);
+  color: var(--ky-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+  flex-shrink: 0;
+}
+
+.ky-booking-head h2 {
+  font-size: 1.2rem;
+  margin: 0 0 0.25rem;
+}
+
+.ky-booking-head .text-muted {
+  font-size: 0.88rem;
+  line-height: 1.45;
+  margin: 0;
+}
+
+.ky-booking-estimate {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 1rem 1.1rem;
+  margin-bottom: 1.25rem;
+  border-radius: var(--ky-radius);
+  background: rgba(15, 23, 42, 0.03);
+  border: 1px solid rgba(15, 23, 42, 0.06);
+}
+
+.ky-booking-estimate .ky-est-label {
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--ky-muted);
+}
+
+.ky-booking-estimate .ky-est-value {
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: var(--ky-primary);
+}
+
+.ky-booking-estimate .ky-est-hint {
+  width: 100%;
+  font-size: 0.8rem;
+  color: var(--ky-muted);
+  margin: 0;
+}
+
+.ky-booking-field label {
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--ky-muted);
+  margin-bottom: 0.4rem;
+  display: block;
+}
+
+.ky-booking-field .form-control {
+  border-radius: 0.5rem;
+  border-color: #cbd5e1;
+  padding: 0.55rem 0.85rem;
+}
+
+.ky-booking-field .form-control:focus {
+  border-color: var(--ky-primary);
+  box-shadow: 0 0 0 0.2rem rgba(var(--ky-primary-rgb), 0.18);
+}
+
+.tool-booking-card {
+  border: none;
+  border-radius: var(--ky-radius-lg);
+  box-shadow: var(--ky-shadow);
+  overflow: hidden;
+}
+
+.tool-booking-card .list-group-item {
+  border-color: rgba(15, 23, 42, 0.06);
+}
+
+.tool-booking-card .btn {
+  border-radius: 0.5rem;
+  font-weight: 600;
+}
+
+/* Loading / empty */
+.ky-spinner-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 220px;
+  gap: 1rem;
+  color: var(--ky-muted);
+}
+
+/* Rating */
+.rating span {
+  margin: 0.1rem;
+}
+
+.condition_rating span {
+  display: inline-block;
+}
+
+/* Date picker alignment */
+.react-datepicker-wrapper {
+  width: 100%;
+}
+
+.react-datepicker-wrapper .form-control {
+  width: 100%;
+}
+
+/* Profile — avoid double container padding from App */
+.profile-page.ky-inner {
+  padding-left: 0;
+  padding-right: 0;
+}
+
+.profile-page .nav-tabs {
+  border-bottom-color: rgba(15, 23, 42, 0.08);
+}
+
+.profile-page .nav-tabs .nav-link {
+  border: none;
+  border-radius: 0.5rem 0.5rem 0 0;
+  color: var(--ky-muted);
+  font-weight: 500;
+  padding: 0.65rem 1rem;
+}
+
+.profile-page .nav-tabs .nav-link:hover {
+  color: var(--ky-primary);
+  background: rgba(var(--ky-primary-rgb), 0.06);
+}
+
+.profile-page .nav-tabs .nav-link.active {
+  color: var(--ky-primary);
+  background: var(--ky-surface);
+  border-bottom: 2px solid var(--ky-primary);
+  font-weight: 600;
+}
+
+/* Dashboard — hero & layout */
+.ky-dashboard-hero {
+  padding: 1.5rem 1.35rem;
+  border-radius: var(--ky-radius-lg);
+  background: linear-gradient(
+    135deg,
+    rgba(var(--ky-primary-rgb), 0.12) 0%,
+    rgba(var(--ky-primary-rgb), 0.04) 45%,
+    var(--ky-surface) 100%
+  );
+  border: 1px solid rgba(15, 23, 42, 0.06);
+  box-shadow: var(--ky-shadow);
+}
+
+.ky-dashboard-eyebrow {
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ky-primary);
+  margin: 0;
+}
+
+.ky-dashboard-title {
+  font-size: clamp(1.5rem, 3vw, 1.85rem);
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  margin: 0;
+}
+
+.ky-dashboard-lead {
+  font-size: 0.95rem;
+  color: var(--ky-muted);
+  max-width: 36rem;
+  line-height: 1.55;
+}
+
+.ky-dashboard-cta {
+  box-shadow: 0 2px 10px rgba(var(--ky-primary-rgb), 0.22);
+  border: none;
+}
+
+.ky-dashboard-cta:hover {
+  box-shadow: 0 4px 14px rgba(var(--ky-primary-rgb), 0.3);
+}
+
+.ky-dashboard-cta:focus-visible {
+  box-shadow: 0 0 0 0.2rem rgba(var(--ky-primary-rgb), 0.35);
+}
+
+/* Account strip on dashboard */
+.ky-dashboard-user-panel .card-body {
+  padding: 1rem 1.15rem;
+}
+
+.ky-dashboard-user-avatar {
+  width: 2.75rem;
+  height: 2.75rem;
+  border-radius: var(--ky-radius);
+  background: rgba(var(--ky-primary-rgb), 0.12);
+  color: var(--ky-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.15rem;
+}
+
+.ky-dashboard-user-label {
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ky-muted);
+  margin-bottom: 0.2rem;
+}
+
+.ky-dashboard-user-name {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--ky-text);
+  letter-spacing: -0.02em;
+  margin-bottom: 0.15rem;
+}
+
+.ky-tool-login-gate-icon {
+  width: 3.25rem;
+  height: 3.25rem;
+  background: rgba(var(--ky-primary-rgb), 0.12);
+  color: var(--ky-primary);
+  font-size: 1.35rem;
+}
+
+.ky-tool-login-gate.card {
+  box-shadow: var(--ky-shadow);
+  background: var(--ky-surface);
+}
+
+.ky-tool-login-gate-title {
+  color: var(--ky-text);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+
+/* Equal-width stacked CTAs; Krishi green via global .btn-primary / .btn-outline-primary */
+.ky-tool-login-gate-actions {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.65rem;
+  width: 100%;
+  max-width: 17.5rem;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+@media (min-width: 576px) {
+  .ky-tool-login-gate-actions {
+    grid-template-columns: 1fr 1fr;
+    max-width: 100%;
+    width: min(100%, 26rem);
+  }
+}
+
+.ky-tool-login-gate-actions .ky-tool-login-gate-btn {
+  width: 100%;
+  min-height: 2.5rem;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ky-tool-login-gate-actions .ky-tool-login-gate-btn.btn-primary {
+  box-shadow: 0 2px 10px rgba(var(--ky-primary-rgb), 0.22);
+  border: none;
+}
+
+.ky-tool-login-gate-actions .ky-tool-login-gate-btn.btn-primary:hover {
+  box-shadow: 0 4px 14px rgba(var(--ky-primary-rgb), 0.3);
+}
+
+/* Stat tiles */
+.ky-dashboard-stat {
+  border-radius: var(--ky-radius-lg) !important;
+  box-shadow: var(--ky-shadow);
+  background: var(--ky-surface);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.ky-dashboard-stat:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--ky-shadow-hover);
+}
+
+.ky-dashboard-stat .card-body {
+  padding: 1.15rem 1.25rem;
+}
+
+.ky-dashboard-stat-icon {
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: var(--ky-radius);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.1rem;
+  margin-bottom: 0.65rem;
+}
+
+.ky-dashboard-stat-icon--bookings {
+  background: rgba(var(--ky-primary-rgb), 0.15);
+  color: var(--ky-primary);
+}
+
+.ky-dashboard-stat-icon--tools {
+  background: rgba(202, 138, 4, 0.18);
+  color: var(--ky-accent);
+}
+
+.ky-dashboard-stat-icon--pending {
+  background: rgba(220, 38, 38, 0.12);
+  color: #dc2626;
+}
+
+.ky-dashboard-stat-value {
+  font-size: 1.65rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+  color: var(--ky-text);
+}
+
+.ky-dashboard-stat-label {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--ky-muted);
+  margin-top: 0.2rem;
+}
+
+/* Detail tiles — same shell as summary stats, richer content */
+.ky-dashboard-stat--detail .ky-dashboard-stat-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 0.5rem;
+  margin-bottom: 0.65rem;
+}
+
+.ky-dashboard-stat--detail .ky-dashboard-stat-icon.ky-dashboard-stat-icon--inline {
+  margin-bottom: 0;
+}
+
+.ky-dashboard-stat--detail .ky-dashboard-stat-title {
+  font-size: 1.2rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.25;
+  color: var(--ky-text);
+  margin: 0 0 0.5rem;
+}
+
+.ky-dashboard-stat--detail .ky-dashboard-stat-meta {
+  font-size: 0.875rem;
+  color: var(--ky-muted);
+  line-height: 1.5;
+  flex-grow: 1;
+}
+
+.ky-dashboard-stat--detail .ky-dashboard-stat-meta strong {
+  color: var(--ky-text);
+  font-weight: 600;
+}
+
+.ky-dashboard-stat--detail .ky-dashboard-stat-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+  margin-top: auto;
+  padding-top: 0.85rem;
+  border-top: 1px solid rgba(15, 23, 42, 0.06);
+}
+
+.ky-dashboard-stat--detail .ky-dashboard-stat-price {
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: var(--ky-primary);
+  letter-spacing: -0.02em;
+}
+
+/* Panel + tabs — same shell as .ky-dashboard-stat (white card, app shadow) */
+.ky-dashboard-panel.card {
+  background: var(--ky-surface) !important;
+  border-radius: var(--ky-radius-lg) !important;
+  box-shadow: var(--ky-shadow);
+  overflow: hidden;
+  border: none !important;
+}
+
+.ky-dashboard-panel .card-body {
+  background: var(--ky-surface);
+}
+
+.ky-dashboard-panel .tab-content {
+  background: var(--ky-surface);
+}
+
+.ky-dashboard-panel .tab-pane {
+  background: var(--ky-surface);
+}
+
+.profile-page .ky-dashboard-tabs.nav-tabs {
+  background: var(--ky-surface);
+  border-bottom: 1px solid rgba(15, 23, 42, 0.08);
+  gap: 0.25rem;
+  margin-bottom: 0;
+  padding-bottom: 0;
+}
+
+.profile-page .ky-dashboard-tabs.nav-tabs .nav-link {
+  border: none !important;
+  border-radius: 0.5rem 0.5rem 0 0;
+  color: var(--ky-muted);
+  font-weight: 600;
+  padding: 0.7rem 1rem;
+  font-size: 0.9rem;
+}
+
+.profile-page .ky-dashboard-tabs.nav-tabs .nav-link:hover {
+  color: var(--ky-primary);
+  background: rgba(var(--ky-primary-rgb), 0.06);
+}
+
+.profile-page .ky-dashboard-tabs.nav-tabs .nav-link.active {
+  color: var(--ky-primary);
+  background: transparent !important;
+  border-bottom: 3px solid var(--ky-primary) !important;
+  margin-bottom: -1px;
+}
+
+.ky-dashboard-tab-pane {
+  padding: 1.25rem 1.35rem 1.5rem;
+}
+
+@media (min-width: 768px) {
+  .ky-dashboard-tab-pane {
+    padding: 1.5rem 1.75rem 1.75rem;
+  }
+}
+
+.ky-dashboard-badge {
+  font-weight: 600;
+  font-size: 0.72rem;
+  padding: 0.35em 0.65em;
+}
+
+.ky-dashboard-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 200px;
+  padding: 2rem;
+}
+
+.ky-dashboard-alert {
+  margin: 0;
+}
+
+.ky-dashboard-empty {
+  text-align: center;
+  padding: 2.5rem 1.5rem;
+  color: var(--ky-muted);
+}
+
+.ky-dashboard-empty-icon {
+  width: 3.5rem;
+  height: 3.5rem;
+  margin: 0 auto 1rem;
+  border-radius: 50%;
+  background: rgba(15, 23, 42, 0.06);
+  color: var(--ky-muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.35rem;
+}
+
+.ky-dashboard-empty h4 {
+  color: var(--ky-text);
+}

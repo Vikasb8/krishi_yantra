@@ -1,0 +1,6 @@
+# Backend stack for Krishi-Yantra (matches backend/settings.py)
+Django>=5.2,<5.3
+djangorestframework>=3.15
+django-cors-headers>=4.4
+djangorestframework-simplejwt>=5.3
+Pillow>=10.0
