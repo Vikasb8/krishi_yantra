@@ -1,0 +1,67 @@
+======================================================
+KRISHI-YANTRA: A COMPLETE USER WORKFLOW EXAMPLE
+======================================================
+
+This document explains the end-to-end flow of the application by following two users: 
+- User A (Farmer Amit) who owns a tool and wants to rent it out.
+- User B (Farmer Rahul) who needs to rent a tool for the weekend.
+
+It breaks down exactly what the users see (Frontend) and what the code does behind the scenes (Backend).
+
+------------------------------------------------------
+PHASE 1: REGISTRATION & LOGIN
+------------------------------------------------------
+1. Amit visits the website and clicks "Create account".
+   [Frontend]: React shows the `RegisterScreen`. Amit types his Name, Email, Phone Number, Address, and Password.
+   [Backend]: When he clicks register, an API POST request is sent to `/api/users/register/`. Django creates a standard `User` in the SQLite database and immediately triggers a post-save signal to create a linked `UserProfile` containing his phone number and address.
+
+2. Amit logs in.
+   [Frontend]: Amit types his email and password.
+   [Backend]: An API POST request is sent to `/api/users/token/`. Django validates the password and returns a JWT Access Token. The frontend saves this token in `localStorage`. Amit is now securely logged in.
+
+------------------------------------------------------
+PHASE 2: LISTING A TOOL (Amit's Perspective)
+------------------------------------------------------
+3. Amit clicks "List a Tool" from his Profile Dashboard.
+   [Frontend]: React shows the `AddToolScreen`. Amit fills out the form (Name: "Mahindra Tractor", Price: ₹1500/day, Quantity: 1) and uploads a photo.
+   [Backend]: When he clicks "Publish listing", an authorized API POST request (with his JWT token attached) goes to `/api/tools/create/`.
+   - Django's `@permission_classes([IsAuthenticated])` verifies Amit's token.
+   - The backend saves the new tool in the database and permanently links the `owner` field to Amit's database User ID.
+
+------------------------------------------------------
+PHASE 3: BROWSING & BOOKING (Rahul's Perspective)
+------------------------------------------------------
+4. Rahul (who has also registered and logged in) visits the homepage.
+   [Frontend]: React calls `GET /api/tools/` to fetch the catalogue. Rahul sees Amit's "Mahindra Tractor" and clicks "View Details".
+
+5. Rahul selects his rental dates using the calendar (e.g., Friday to Sunday).
+   [Frontend]: The React DatePicker component dynamically calls `GET /api/tools/<id>/?start=Friday&end=Sunday`.
+   [Backend]: Django intercepts this, runs a custom overlap calculation algorithm (`can_book_units` in `availability.py`), and checks the database to see if Amit's tractor is already booked for those exact overlapping days. It returns `True` (available).
+
+6. Rahul clicks the "Book now" button.
+   [Frontend]: Sends an authorized API POST request to `/api/bookings/create/` with the tool ID and his chosen dates.
+   [Backend]: 
+   - Django receives the request and verifies Rahul's JWT token.
+   - It calculates the total cost automatically: 3 rental days * ₹1500/day = ₹4500.
+   - It creates a new `Booking` record in the database where `renter` = Rahul, `tool` = Amit's Tractor, and `status` = 'PENDING'.
+
+------------------------------------------------------
+PHASE 4: OWNER APPROVAL & FULFILLMENT (Amit's Perspective)
+------------------------------------------------------
+7. Amit checks his Profile Dashboard a few hours later.
+   [Frontend]: The "Booking requests" tab dynamically calls `GET /api/users/mytoolbookings/`.
+   [Backend]: Django queries the database for all bookings where the linked tool's `owner` is Amit. It returns Rahul's pending request.
+
+8. Amit reviews the request.
+   [Frontend]: Amit can see Rahul's Name, Phone number, and Address cleanly displayed on the request card (thanks to the customized UserSerializer). Amit decides he is happy to rent to Rahul and clicks "Approve".
+   [Backend]: Sends an API PUT request to `/api/bookings/<id>/approve/`. Django updates the exact booking record in the database changing the status from 'PENDING' to 'CONFIRMED'.
+
+------------------------------------------------------
+PHASE 5: COMPLETION
+------------------------------------------------------
+9. Rahul checks his own Profile Dashboard.
+   [Frontend]: The "My bookings" tab calls `GET /api/users/mybookings/`.
+   [Backend]: Django looks up Rahul's bookings. 
+   Rahul sees his tractor booking now has a green 'CONFIRMED' badge next to it.
+
+10. Real World: Amit and Rahul now call each other via the phone numbers provided on their profiles, and the physical exchange of the tractor takes place seamlessly!

@@ -7,6 +7,8 @@ import { register } from '../actions/userActions';
 function RegisterScreen() {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
+  const [phone, setPhone] = useState('');
+  const [address, setAddress] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [message, setMessage] = useState('');
@@ -33,7 +35,7 @@ function RegisterScreen() {
       setMessage('Passwords do not match');
     } else {
       setMessage('');
-      dispatch(register(name, email, password));
+      dispatch(register(name, email, phone, address, password));
     }
   };
 
@@ -85,6 +87,30 @@ function RegisterScreen() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 autoComplete="email"
+              />
+            </Form.Group>
+
+            <Form.Group className="mb-3" controlId="phone">
+              <Form.Label>Phone number</Form.Label>
+              <Form.Control
+                required
+                type="tel"
+                placeholder="Your phone number"
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
+                autoComplete="tel"
+              />
+            </Form.Group>
+
+            <Form.Group className="mb-3" controlId="address">
+              <Form.Label>Address</Form.Label>
+              <Form.Control
+                required
+                as="textarea"
+                rows={2}
+                placeholder="Your address"
+                value={address}
+                onChange={(e) => setAddress(e.target.value)}
               />
             </Form.Group>
 

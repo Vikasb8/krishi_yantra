@@ -15,6 +15,10 @@ import {
     USER_LIST_TOOLS_REQUEST,
     USER_LIST_TOOLS_SUCCESS,
     USER_LIST_TOOLS_FAIL,
+
+    USER_UPDATE_PROFILE_REQUEST,
+    USER_UPDATE_PROFILE_SUCCESS,
+    USER_UPDATE_PROFILE_FAIL,
 } from '../constants/userConstants';
 
 // Action to log in a user
@@ -63,7 +67,7 @@ export const logout = () => (dispatch) => {
     dispatch({ type: USER_LOGOUT });
 };
 
-export const register = (name, email, password) => async (dispatch) => {
+export const register = (name, email, phone, address, password) => async (dispatch) => {
     try {
         dispatch({ type: USER_REGISTER_REQUEST });
 
@@ -73,7 +77,7 @@ export const register = (name, email, password) => async (dispatch) => {
 
         await apiClient.post(
             '/api/users/register/',
-            { 'name': name, 'email': email, 'password': password },
+            { 'name': name, 'email': email, 'phone': phone, 'address': address, 'password': password },
             config
         );
 
@@ -154,5 +158,41 @@ export const listMyToolBookings = () => async (dispatch, getState) => {
         dispatch({ type: 'USER_LIST_TOOL_BOOKINGS_SUCCESS', payload: data });
     } catch (error) {
         dispatch({ type: 'USER_LIST_TOOL_BOOKINGS_FAIL', payload: 'Could not fetch data.' });
+    }
+};
+
+export const updateUserProfile = (user) => async (dispatch) => {
+    try {
+        dispatch({ type: USER_UPDATE_PROFILE_REQUEST });
+
+        const config = {
+            headers: { 'Content-Type': 'application/json' },
+        };
+
+        const { data } = await apiClient.put(
+            '/api/users/profile/',
+            user,
+            config
+        );
+
+        dispatch({
+            type: USER_UPDATE_PROFILE_SUCCESS,
+            payload: data,
+        });
+
+        dispatch({
+            type: USER_LOGIN_SUCCESS,
+            payload: data,
+        });
+
+        localStorage.setItem('userInfo', JSON.stringify(data));
+
+    } catch (error) {
+        dispatch({
+            type: USER_UPDATE_PROFILE_FAIL,
+            payload: error.response && error.response.data.detail
+                ? error.response.data.detail
+                : error.message,
+        });
     }
 };

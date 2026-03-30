@@ -140,6 +140,8 @@ function ToolScreen() {
     !rangeCheck.ok ||
     !globallyBookable;
 
+  const isOwner = userInfo && tool?.owner && userInfo.id === tool.owner;
+
   if (!userInfo) {
     return (
       <div className="tool-detail-page">
@@ -286,6 +288,13 @@ function ToolScreen() {
           </Col>
 
           <Col lg={12}>
+            {isOwner ? (
+                <Alert variant="info" className="ky-booking-card text-center py-5 border-0 shadow-sm rounded-4 mb-0">
+                    <i className="fas fa-info-circle fa-3x mb-3 text-info opacity-75" aria-hidden />
+                    <h3 className="h4 mb-2">This is your listing</h3>
+                    <p className="mb-0 text-muted">You cannot book your own equipment. Wait for renters to send booking requests.</p>
+                </Alert>
+            ) : (
             <Card className="ky-booking-card">
               <div className="ky-booking-head">
                 <div className="ky-booking-head-icon" aria-hidden>
@@ -450,6 +459,7 @@ function ToolScreen() {
                 </div>
               </Card.Body>
             </Card>
+            )}
           </Col>
         </Row>
       )}

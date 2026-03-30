@@ -33,9 +33,14 @@ class ToolSerializer(serializers.ModelSerializer):
 
 
 class UserSerializer(serializers.ModelSerializer):
+    name = serializers.CharField(source='first_name', read_only=True)
+    phone_number = serializers.CharField(source='profile.phone_number', read_only=True, default='')
+    address = serializers.CharField(source='profile.address', read_only=True, default='')
+    location = serializers.CharField(source='profile.location', read_only=True, default='')
+
     class Meta:
         model = User
-        fields = ["id", "username", "email"]
+        fields = ["id", "username", "email", "name", "phone_number", "address", "location"]
 
 
 class BookingSerializer(serializers.ModelSerializer):

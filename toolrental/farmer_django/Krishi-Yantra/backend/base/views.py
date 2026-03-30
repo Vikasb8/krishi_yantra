@@ -15,16 +15,37 @@ from .availability import can_book_units
 # Create your views here.
 
 
-@api_view(["GET"])
+@api_view(["GET", "PUT"])
 @permission_classes([IsAuthenticated])
 def get_user_profile(request):
     user = request.user
+
+    if request.method == "PUT":
+        data = request.data
+        user.first_name = data.get("name", user.first_name)
+        user.username = data.get("email", user.username)
+        user.email = data.get("email", user.email)
+
+        if data.get("password"):
+            user.password = make_password(data["password"])
+        
+        user.save()
+
+        if hasattr(user, 'profile'):
+            user.profile.phone_number = data.get("phone_number", getattr(user.profile, 'phone_number', ''))
+            user.profile.address = data.get("address", getattr(user.profile, 'address', ''))
+            user.profile.location = data.get("location", getattr(user.profile, 'location', ''))
+            user.profile.save()
+
     return Response(
         {
             "id": user.id,
             "username": user.username,
             "email": user.email or "",
             "name": user.first_name or "",
+            "phone_number": getattr(user.profile, 'phone_number', '') if hasattr(user, 'profile') else '',
+            "address": getattr(user.profile, 'address', '') if hasattr(user, 'profile') else '',
+            "location": getattr(user.profile, 'location', '') if hasattr(user, 'profile') else '',
         }
     )
 
@@ -128,6 +149,12 @@ def create_booking(request):
     except Tool.DoesNotExist:
         return Response({"detail": "Tool not found."}, status=status.HTTP_404_NOT_FOUND)
 
+    if tool.owner == user:
+        return Response(
+            {"detail": "You cannot book your own tool."},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
+
     try:
         start_date = datetime.strptime(start_date_str, "%Y-%m-%d").date()
         end_date = datetime.strptime(end_date_str, "%Y-%m-%d").date()
@@ -196,12 +223,16 @@ def get_my_tools(request):
 def register_user(request):
     data = request.data
     try:
-        User.objects.create(
+        user = User.objects.create(
             first_name=data["name"],
             username=data["email"],
             email=data["email"],
             password=make_password(data["password"]),
         )
+        if hasattr(user, 'profile'):
+            user.profile.phone_number = data.get("phone", "")
+            user.profile.address = data.get("address", "")
+            user.profile.save()
         return Response(
             {"detail": "User was registered successfully!"},
             status=status.HTTP_201_CREATED,

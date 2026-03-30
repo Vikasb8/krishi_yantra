@@ -1,0 +1,46 @@
+======================================================
+UNDERSTANDING JWT AND AUTHENTICATION IN KRISHI-YANTRA
+======================================================
+
+1. WHAT IS A JWT?
+-----------------
+JWT stands for JSON Web Token. It is a secure, compact way of transmitting information between a client (like our React frontend) and a server (like our Django backend) as a JSON object. 
+
+The most important feature of a JWT is that it is "Stateless". Traditional session-based authentication requires the server to remember every logged-in user in its database. JWTs, however, contain all the necessary user information directly inside the token itself, cryptographically signed by the server's Secret Key. This means the server can verify who the user is without having to query the database every single time they make a request, making the application much faster and highly scalable.
+
+2. HOW DOES IT WORK IN THIS PROJECT?
+------------------------------------
+In Krishi-Yantra, we use the library 'djangorestframework-simplejwt' to handle this process. The flow relies on two distinct types of tokens to balance security and user convenience:
+
+A. The Access Token (Configured for 30 days): This is the primary key. It is attached to every single private request the user makes (like viewing their dashboard or booking a tool). 
+B. The Refresh Token (Configured for 90 days): This is a special, long-lived key. If an Access Token eventually expires, the frontend can securely trade in the Refresh Token to get a brand new Access Token without forcing the user to type in their password again.
+
+3. THE STEP-BY-STEP AUTHENTICATION FLOW
+---------------------------------------
+Here is exactly what happens when a user uses Krishi-Yantra:
+
+STEP 1: LOGIN
+- The user enters their Email and Password on the React frontend.
+- Axios (our frontend HTTP client) sends a POST request with these credentials to the backend endpoint: `/api/users/token/`.
+- Django checks the database. If the password is correct, it generates and returns two strings: an Access Token and a Refresh Token.
+
+STEP 2: STORAGE
+- The frontend receives these tokens and saves them in the browser's `localStorage` (inside the `userInfo` object). This ensures the user stays logged in even if they close the browser tab or refresh the page.
+
+STEP 3: SECURE REQUESTS (INTERCEPTORS)
+- Now, the user clicks "Book This Equipment" or "List a Tool". These actions require authentication.
+- Before Axios actually sends the request to the backend, a piece of code called an "Interceptor" (located in `frontend/src/api/apiClient.js`) automatically steps in. 
+- It grabs the Access Token from `localStorage` and attaches it to the HTTP Headers of the request like this: `Authorization: Bearer <Your_Access_Token>`.
+
+STEP 4: BACKEND VERIFICATION
+- The backend receives the booking request. 
+- The `@permission_classes([IsAuthenticated])` decorator on the Django view automatically kicks in. It takes the token from the header, mathematically verifies the secret cryptographic signature, and immediately figures out exactly which User made the request without having to perform a database session lookup.
+- The backend processes the booking under that user's identity and returns a success response.
+
+STEP 5: AUTOMATIC REFRESH (THE SAFETY NET)
+- What if the Access Token has expired?
+- When the frontend sends the expired token, Django rejects it and returns a "401 Unauthorized" error.
+- Our custom Axios Interceptor catches this exact error *before* the UI crashes or logs the user out.
+- It pauses the original booking request, grabs the valid Refresh Token, and seamlessly sends it to `/api/users/token/refresh/`.
+- The server responds with a brand new Access Token! The frontend saves it, and then instantly retries the original booking request with the new valid token.
+- The user experiences zero interruption and doesn't even know their token was just refreshed in the background.

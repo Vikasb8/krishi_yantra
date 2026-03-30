@@ -12,8 +12,9 @@ import {
   Tabs,
   Tab,
   Modal,
+  Form,
 } from 'react-bootstrap';
-import { listMyBookings, listMyTools, listMyToolBookings } from '../actions/userActions';
+import { listMyBookings, listMyTools, listMyToolBookings, updateUserProfile } from '../actions/userActions';
 import apiClient from '../api/apiClient';
 
 function ProfileScreen() {
@@ -23,6 +24,13 @@ function ProfileScreen() {
   const [selectedBooking, setSelectedBooking] = useState(null);
   const [actionType, setActionType] = useState('');
   const [profile, setProfile] = useState(null);
+  const [isEditingProfile, setIsEditingProfile] = useState(false);
+
+  const [name, setName] = useState('');
+  const [phone, setPhone] = useState('');
+  const [address, setAddress] = useState('');
+  const [locationField, setLocationField] = useState('');
+  const [password, setPassword] = useState('');
 
   const userLogin = useSelector((state) => state.userLogin);
   const { userInfo } = userLogin;
@@ -39,6 +47,9 @@ function ProfileScreen() {
     error: errorToolBookings,
     bookings: toolBookings = [],
   } = myToolBookingsList;
+
+  const userUpdateProfile = useSelector((state) => state.userUpdateProfile);
+  const { loading: updateLoading, error: updateError, success: updateSuccess } = userUpdateProfile || {};
 
   const pendingCount = useMemo(
     () => toolBookings.filter((b) => b.status === 'PENDING').length,
@@ -61,7 +72,13 @@ function ProfileScreen() {
     (async () => {
       try {
         const { data } = await apiClient.get('/api/users/profile/');
-        if (!cancelled) setProfile(data);
+        if (!cancelled) {
+          setProfile(data);
+          setName(data.name || '');
+          setPhone(data.phone_number || '');
+          setAddress(data.address || '');
+          setLocationField(data.location || '');
+        }
       } catch {
         if (!cancelled) setProfile(null);
       }
@@ -69,7 +86,18 @@ function ProfileScreen() {
     return () => {
       cancelled = true;
     };
-  }, [userInfo]);
+  }, [userInfo, updateSuccess]);
+
+  const submitUpdateProfile = (e) => {
+    e.preventDefault();
+    dispatch(updateUserProfile({
+        name,
+        phone_number: phone,
+        address,
+        location: locationField,
+        password: password
+    }));
+  };
 
   const displayName =
     (profile?.name && profile.name.trim()) ||
@@ -163,34 +191,94 @@ function ProfileScreen() {
 
       <Card className="ky-dashboard-stat ky-dashboard-user-panel border-0 mb-4">
         <Card.Body>
-          <Row className="align-items-center g-3">
-            <Col xs="auto">
-              <div className="ky-dashboard-user-avatar" aria-hidden>
-                <i className="fas fa-user" />
+          {!isEditingProfile ? (
+            <Row className="align-items-center g-3">
+              <Col xs="auto">
+                <div className="ky-dashboard-user-avatar" aria-hidden>
+                  <i className="fas fa-user" />
+                </div>
+              </Col>
+              <Col className="min-w-0">
+                <div className="ky-dashboard-user-label">Your account</div>
+                <div className="ky-dashboard-user-name text-truncate">{displayName}</div>
+                {displayEmail && displayEmail !== displayName ? (
+                  <div className="text-muted small text-truncate">{displayEmail}</div>
+                ) : null}
+                <div className="text-muted small">
+                  Username <span className="text-body">{displayUsername}</span>
+                </div>
+              </Col>
+              <Col xs={12} sm="auto" className="ms-sm-auto d-flex gap-2">
+                <Button
+                  variant="outline-secondary"
+                  size="sm"
+                  className="ky-dashboard-cta rounded-pill fw-semibold"
+                  onClick={() => setIsEditingProfile(true)}
+                >
+                  <i className="fas fa-edit me-1" aria-hidden />
+                  Edit Profile
+                </Button>
+                <Button
+                  variant="primary"
+                  size="sm"
+                  className="ky-dashboard-cta rounded-pill fw-semibold"
+                  onClick={() => navigate('/add-tool')}
+                >
+                  <i className="fas fa-plus me-1" aria-hidden />
+                  List a tool
+                </Button>
+              </Col>
+            </Row>
+          ) : (
+            <div className="px-md-2">
+              <div className="d-flex justify-content-between align-items-center mb-3">
+                  <h5 className="mb-0">Edit Profile</h5>
+                  <Button variant="close" onClick={() => setIsEditingProfile(false)} aria-label="Close" />
               </div>
-            </Col>
-            <Col className="min-w-0">
-              <div className="ky-dashboard-user-label">Your account</div>
-              <div className="ky-dashboard-user-name text-truncate">{displayName}</div>
-              {displayEmail && displayEmail !== displayName ? (
-                <div className="text-muted small text-truncate">{displayEmail}</div>
-              ) : null}
-              <div className="text-muted small">
-                Username <span className="text-body">{displayUsername}</span>
-              </div>
-            </Col>
-            <Col xs={12} sm="auto" className="ms-sm-auto d-flex">
-              <Button
-                variant="primary"
-                size="sm"
-                className="ky-dashboard-cta rounded-pill fw-semibold"
-                onClick={() => navigate('/add-tool')}
-              >
-                <i className="fas fa-plus me-1" aria-hidden />
-                List a tool
-              </Button>
-            </Col>
-          </Row>
+              {updateError && <Alert variant="danger">{updateError}</Alert>}
+              {updateSuccess && <Alert variant="success">Profile updated successfully!</Alert>}
+              <Form onSubmit={submitUpdateProfile}>
+                  <Row>
+                      <Col md={6}>
+                          <Form.Group className="mb-3" controlId="name">
+                              <Form.Label>Name</Form.Label>
+                              <Form.Control type="text" value={name} onChange={(e) => setName(e.target.value)} />
+                          </Form.Group>
+                      </Col>
+                      <Col md={6}>
+                          <Form.Group className="mb-3" controlId="phone">
+                              <Form.Label>Phone number</Form.Label>
+                              <Form.Control type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} />
+                          </Form.Group>
+                      </Col>
+                  </Row>
+                  <Form.Group className="mb-3" controlId="address">
+                      <Form.Label>Address</Form.Label>
+                      <Form.Control as="textarea" rows={2} value={address} onChange={(e) => setAddress(e.target.value)} />
+                  </Form.Group>
+                  <Row>
+                      <Col md={6}>
+                          <Form.Group className="mb-3" controlId="location">
+                              <Form.Label>Location</Form.Label>
+                              <Form.Control type="text" placeholder="City, State, etc." value={locationField} onChange={(e) => setLocationField(e.target.value)} />
+                          </Form.Group>
+                      </Col>
+                      <Col md={6}>
+                          <Form.Group className="mb-3" controlId="password">
+                              <Form.Label>New Password (Optional)</Form.Label>
+                              <Form.Control type="password" placeholder="Leave blank to keep same" value={password} onChange={(e) => setPassword(e.target.value)} />
+                          </Form.Group>
+                      </Col>
+                  </Row>
+                  <div className="d-flex justify-content-end gap-2 mt-2">
+                      <Button variant="light" className="rounded-pill px-3" onClick={() => setIsEditingProfile(false)}>Close</Button>
+                      <Button type="submit" variant="primary" className="rounded-pill px-4" disabled={updateLoading}>
+                          {updateLoading ? 'Saving…' : 'Save Changes'}
+                      </Button>
+                  </div>
+              </Form>
+            </div>
+          )}
         </Card.Body>
       </Card>
 
@@ -417,8 +505,23 @@ function ProfileScreen() {
                             <h2 className="ky-dashboard-stat-title">{booking.tool?.name}</h2>
                             <div className="ky-dashboard-stat-meta">
                               <div>
-                                <strong>Renter</strong> {booking.renter?.username || '—'}
+                                <strong>Renter</strong> {booking.renter?.name || booking.renter?.username || '—'}
                               </div>
+                              {booking.renter?.email && (
+                                <div>
+                                  <strong>Email</strong> <a href={`mailto:${booking.renter.email}`}>{booking.renter.email}</a>
+                                </div>
+                              )}
+                              {booking.renter?.phone_number && (
+                                <div>
+                                  <strong>Phone</strong> <a href={`tel:${booking.renter.phone_number}`}>{booking.renter.phone_number}</a>
+                                </div>
+                              )}
+                              {booking.renter?.address && (
+                                <div>
+                                  <strong>Address</strong> {booking.renter.address}
+                                </div>
+                              )}
                               <div className="mt-2">
                                 <strong>Dates</strong>{' '}
                                 {new Date(booking.start_date).toLocaleDateString()} →{' '}

@@ -3,7 +3,7 @@ import { createStore, combineReducers, applyMiddleware, compose } from 'redux';
 import { thunk } from 'redux-thunk'; 
 
 // Import your reducers
-import { userLoginReducer, userRegisterReducer, myBookingsListReducer, myToolsListReducer,myToolBookingsListReducer  } from './reducers/userReducers';
+import { userLoginReducer, userRegisterReducer, myBookingsListReducer, myToolsListReducer, myToolBookingsListReducer, userUpdateProfileReducer } from './reducers/userReducers';
 import { toolListReducer, toolDetailsReducer } from './reducers/toolReducers';
 
 const reducer = combineReducers({
@@ -14,6 +14,7 @@ const reducer = combineReducers({
     myBookingsList: myBookingsListReducer,
     myToolsList: myToolsListReducer, 
     myToolBookingsList: myToolBookingsListReducer,
+    userUpdateProfile: userUpdateProfileReducer,
 });
 
 function parseStoredUserInfo() {
