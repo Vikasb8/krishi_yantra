@@ -1,12 +1,19 @@
 """Inventory: multiple units per tool; overlap uses peak concurrent bookings."""
-from datetime import timedelta
+from datetime import date, timedelta
 
 ACTIVE_BOOKING_STATUSES = ("PENDING", "CONFIRMED")
 
 
 def _intervals_for_tool(tool):
+    today = date.today()
     qs = tool.booking_set.filter(status__in=ACTIVE_BOOKING_STATUSES)
     for b in qs:
+        # Do not count bookings that are entirely in the past.
+        if b.end_date < today:
+            continue
+
+        # Pending requests that are past the end date are not active, but pending ones
+        # with current/future date ranges are still treated as real reservations.
         u = getattr(b, "units", None) or 1
         yield b.start_date, b.end_date, int(u)
 

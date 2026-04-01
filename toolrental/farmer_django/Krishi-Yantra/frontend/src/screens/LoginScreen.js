@@ -16,7 +16,7 @@ function LoginScreen() {
   const { loading, error, userInfo } = userLogin;
 
   const redirectTo =
-    typeof location.state?.from === 'string' ? location.state.from : '/';
+    typeof location.state?.from === 'string' ? location.state.from : '/browse';
 
   useEffect(() => {
     if (userInfo) {
@@ -76,6 +76,7 @@ function LoginScreen() {
             </Form.Group>
 
             <Button type="submit" variant="primary" disabled={loading}>
+              <i className="fas fa-sign-in-alt me-2" aria-hidden />
               Sign in
             </Button>
           </Form>

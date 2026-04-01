@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, date
 
 from django.shortcuts import get_object_or_404
 from rest_framework import status
@@ -8,8 +8,8 @@ from rest_framework.permissions import IsAuthenticated, AllowAny
 from django.contrib.auth.hashers import make_password
 from django.contrib.auth.models import User
 
-from .models import Tool, Booking
-from .serializers import ToolSerializer, BookingSerializer
+from .models import Tool, Booking, Review
+from .serializers import ToolSerializer, BookingSerializer, ReviewSerializer, ReviewCreateSerializer
 from .availability import can_book_units
 
 # Create your views here.
@@ -35,7 +35,16 @@ def get_user_profile(request):
             user.profile.phone_number = data.get("phone_number", getattr(user.profile, 'phone_number', ''))
             user.profile.address = data.get("address", getattr(user.profile, 'address', ''))
             user.profile.location = data.get("location", getattr(user.profile, 'location', ''))
+            
+            # Handle profile image upload
+            if 'profile_image' in request.FILES:
+                user.profile.profile_image = request.FILES['profile_image']
+            
             user.profile.save()
+
+    profile_image_url = None
+    if hasattr(user, 'profile') and user.profile.profile_image:
+        profile_image_url = request.build_absolute_uri(user.profile.profile_image.url)
 
     return Response(
         {
@@ -46,8 +55,15 @@ def get_user_profile(request):
             "phone_number": getattr(user.profile, 'phone_number', '') if hasattr(user, 'profile') else '',
             "address": getattr(user.profile, 'address', '') if hasattr(user, 'profile') else '',
             "location": getattr(user.profile, 'location', '') if hasattr(user, 'profile') else '',
+            "profile_image": profile_image_url,
         }
     )
+
+
+
+def expire_pending_bookings():
+    today = date.today()
+    Booking.objects.filter(status="PENDING", start_date__lte=today).update(status="EXPIRED")
 
 
 @api_view(["GET"])
@@ -65,15 +81,17 @@ def getRoutes(request):
 
 @api_view(["GET"])
 def getTools(request):
+    expire_pending_bookings()
     tools = Tool.objects.all()
-    serializer = ToolSerializer(tools, many=True)
+    serializer = ToolSerializer(tools, many=True, context={'request': request})
     return Response(serializer.data)
 
 
 @api_view(["GET"])
 def getTool(request, pk):
+    expire_pending_bookings()
     tool = get_object_or_404(Tool, pk=pk)
-    serializer = ToolSerializer(tool, many=False)
+    serializer = ToolSerializer(tool, many=False, context={'request': request})
     data = dict(serializer.data)
 
     start_s = request.query_params.get("start")
@@ -116,6 +134,34 @@ def update_tool(request, pk):
         serializer.save()
         return Response(serializer.data)
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+@api_view(["PUT"])
+@permission_classes([IsAuthenticated])
+def relist_tool(request, pk):
+    try:
+        tool = Tool.objects.get(pk=pk)
+    except Tool.DoesNotExist:
+        return Response({"detail": "Tool not found."}, status=status.HTTP_404_NOT_FOUND)
+
+    if tool.owner != request.user:
+        return Response(
+            {"detail": "Not authorized to manage this tool."},
+            status=status.HTTP_403_FORBIDDEN,
+        )
+
+    requested_units = int(request.data.get("quantity", tool.quantity) or tool.quantity)
+    if requested_units < 1:
+        return Response(
+            {"detail": "Quantity must be at least 1."},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
+
+    tool.quantity = max(tool.quantity, requested_units)
+    tool.save()
+
+    serializer = ToolSerializer(tool, many=False)
+    return Response(serializer.data)
 
 
 @api_view(["POST"])
@@ -203,6 +249,7 @@ def create_booking(request):
 @api_view(["GET"])
 @permission_classes([IsAuthenticated])
 def get_my_bookings(request):
+    expire_pending_bookings()
     user = request.user
     bookings = Booking.objects.filter(renter=user)
     serializer = BookingSerializer(bookings, many=True)
@@ -247,6 +294,7 @@ def register_user(request):
 @api_view(["GET"])
 @permission_classes([IsAuthenticated])
 def get_my_tool_bookings(request):
+    expire_pending_bookings()
     user = request.user
     bookings = Booking.objects.filter(tool__owner=user)
     serializer = BookingSerializer(bookings, many=True)
@@ -266,6 +314,9 @@ def approve_booking(request, pk):
 
         booking.status = "CONFIRMED"
         booking.save()
+
+        # Immediately refresh availability and expire past pending bookings
+        expire_pending_bookings()
 
         serializer = BookingSerializer(booking, many=False)
         return Response(serializer.data)
@@ -291,3 +342,158 @@ def reject_booking(request, pk):
         return Response(serializer.data)
     except Booking.DoesNotExist:
         return Response({"detail": "Booking not found."}, status=status.HTTP_404_NOT_FOUND)
+
+
+# Review Endpoints
+
+
+@api_view(["POST"])
+@permission_classes([IsAuthenticated])
+def create_review(request):
+    """
+    Create a review for a tool. User must have a completed booking for this tool.
+    Body: toolId (int), rating (1-5), comment (optional str)
+    """
+    user = request.user
+    data = request.data
+
+    try:
+        tool_id = data.get("toolId")
+    except (KeyError, TypeError):
+        return Response(
+            {"detail": "toolId is required."},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
+
+    try:
+        tool = Tool.objects.get(id=tool_id)
+    except Tool.DoesNotExist:
+        return Response({"detail": "Tool not found."}, status=status.HTTP_404_NOT_FOUND)
+
+    # Check if user has a confirmed or completed booking for this tool
+    completed_booking = Booking.objects.filter(
+        renter=user,
+        tool=tool,
+        status__in=["COMPLETED", "CONFIRMED"]
+    ).exists()
+
+    if not completed_booking:
+        return Response(
+            {"detail": "You can only review tools you have rented. Your booking must be confirmed or completed."},
+            status=status.HTTP_403_FORBIDDEN,
+        )
+
+    # Create or update review
+    serializer = ReviewCreateSerializer(data=request.data)
+    if serializer.is_valid():
+        review = serializer.save(user=user, product=tool)
+        return_serializer = ReviewSerializer(review, many=False)
+        return Response(return_serializer.data, status=status.HTTP_201_CREATED)
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+@api_view(["GET"])
+def get_tool_reviews(request, pk):
+    """
+    Get all reviews for a tool, paginated and sorted by most recent first.
+    """
+    try:
+        tool = Tool.objects.get(id=pk)
+    except Tool.DoesNotExist:
+        return Response({"detail": "Tool not found."}, status=status.HTTP_404_NOT_FOUND)
+
+    # Optionally add pagination
+    limit = int(request.query_params.get('limit', 20))
+    offset = int(request.query_params.get('offset', 0))
+
+    reviews = tool.reviews.all()[offset : offset + limit]
+    serializer = ReviewSerializer(reviews, many=True)
+
+    return Response({
+        "total": tool.reviews.count(),
+        "limit": limit,
+        "offset": offset,
+        "results": serializer.data
+    })
+
+
+@api_view(["GET"])
+def get_average_rating(request, pk):
+    """
+    Get the average rating for a tool and the review count.
+    """
+    try:
+        tool = Tool.objects.get(id=pk)
+    except Tool.DoesNotExist:
+        return Response({"detail": "Tool not found."}, status=status.HTTP_404_NOT_FOUND)
+
+    reviews = tool.reviews.all()
+    if reviews.count() > 0:
+        total_rating = sum(review.rating for review in reviews)
+        average_rating = round(total_rating / reviews.count(), 1)
+    else:
+        average_rating = 0
+
+    return Response({
+        "tool_id": pk,
+        "average_rating": average_rating,
+        "review_count": reviews.count()
+    })
+
+
+@api_view(["PUT"])
+@permission_classes([IsAuthenticated])
+def update_review(request, pk):
+    """
+    Update a review (only by the review author).
+    """
+    try:
+        review = Review.objects.get(id=pk)
+    except Review.DoesNotExist:
+        return Response({"detail": "Review not found."}, status=status.HTTP_404_NOT_FOUND)
+
+    if review.user != request.user:
+        return Response(
+            {"detail": "You can only edit your own reviews."},
+            status=status.HTTP_403_FORBIDDEN,
+        )
+
+    serializer = ReviewCreateSerializer(review, data=request.data, partial=True)
+    if serializer.is_valid():
+        serializer.save()
+        return_serializer = ReviewSerializer(review, many=False)
+        return Response(return_serializer.data)
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+@api_view(["DELETE"])
+@permission_classes([IsAuthenticated])
+def delete_review(request, pk):
+    """
+    Delete a review (only by the review author).
+    """
+    try:
+        review = Review.objects.get(id=pk)
+    except Review.DoesNotExist:
+        return Response({"detail": "Review not found."}, status=status.HTTP_404_NOT_FOUND)
+
+    if review.user != request.user:
+        return Response(
+            {"detail": "You can only delete your own reviews."},
+            status=status.HTTP_403_FORBIDDEN,
+        )
+
+    review.delete()
+    return Response({"detail": "Review deleted successfully."}, status=status.HTTP_204_NO_CONTENT)
+
+
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
+def get_my_reviews(request):
+    """
+    Get all reviews created by the current user.
+    """
+    user = request.user
+    reviews = Review.objects.filter(user=user)
+    serializer = ReviewSerializer(reviews, many=True)
+    return Response(serializer.data)

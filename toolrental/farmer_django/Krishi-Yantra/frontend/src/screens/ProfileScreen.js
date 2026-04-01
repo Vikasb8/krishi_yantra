@@ -23,6 +23,8 @@ function ProfileScreen() {
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [selectedBooking, setSelectedBooking] = useState(null);
   const [actionType, setActionType] = useState('');
+  const [relistMessage, setRelistMessage] = useState('');
+  const [relistError, setRelistError] = useState('');
   const [profile, setProfile] = useState(null);
   const [isEditingProfile, setIsEditingProfile] = useState(false);
 
@@ -91,11 +93,11 @@ function ProfileScreen() {
   const submitUpdateProfile = (e) => {
     e.preventDefault();
     dispatch(updateUserProfile({
-        name,
-        phone_number: phone,
-        address,
-        location: locationField,
-        password: password
+      name,
+      phone_number: phone,
+      address,
+      location: locationField,
+      password: password
     }));
   };
 
@@ -115,6 +117,7 @@ function ProfileScreen() {
       REJECTED: { variant: 'danger' },
       COMPLETED: { variant: 'info' },
       CANCELLED: { variant: 'secondary' },
+      EXPIRED: { variant: 'danger' },
     };
 
     const statusInfo = statusMap[status] || { variant: 'secondary' };
@@ -141,9 +144,28 @@ function ProfileScreen() {
         headers: { 'Content-Type': 'application/json' },
       });
       dispatch(listMyToolBookings());
+      dispatch(listMyTools());
       setShowConfirmModal(false);
     } catch (error) {
       console.error('Error updating booking status:', error);
+    }
+  };
+
+  const handleRelistTool = async (toolId, units) => {
+    setRelistMessage('');
+    setRelistError('');
+
+    try {
+      const { data } = await apiClient.put(
+        `/api/tools/${toolId}/relist/`,
+        { quantity: units },
+        { headers: { 'Content-Type': 'application/json' } }
+      );
+      setRelistMessage(`Tool "${data.name}" relisted with quantity ${data.quantity}.`);
+      dispatch(listMyTools());
+      dispatch(listMyToolBookings());
+    } catch (error) {
+      setRelistError(error?.response?.data?.detail || 'Unable to relist tool right now.');
     }
   };
 
@@ -189,7 +211,7 @@ function ProfileScreen() {
         </p>
       </header>
 
-      <Card className="ky-dashboard-stat ky-dashboard-user-panel border-0 mb-4">
+      <Card className="ky-dashboard-stat ky-dashboard-user-panel border-0 mb-4 fade-in-up delay-50">
         <Card.Body>
           {!isEditingProfile ? (
             <Row className="align-items-center g-3">
@@ -232,50 +254,50 @@ function ProfileScreen() {
           ) : (
             <div className="px-md-2">
               <div className="d-flex justify-content-between align-items-center mb-3">
-                  <h5 className="mb-0">Edit Profile</h5>
-                  <Button variant="close" onClick={() => setIsEditingProfile(false)} aria-label="Close" />
+                <h5 className="mb-0">Edit Profile</h5>
+                <Button variant="close" onClick={() => setIsEditingProfile(false)} aria-label="Close" />
               </div>
               {updateError && <Alert variant="danger">{updateError}</Alert>}
               {updateSuccess && <Alert variant="success">Profile updated successfully!</Alert>}
               <Form onSubmit={submitUpdateProfile}>
-                  <Row>
-                      <Col md={6}>
-                          <Form.Group className="mb-3" controlId="name">
-                              <Form.Label>Name</Form.Label>
-                              <Form.Control type="text" value={name} onChange={(e) => setName(e.target.value)} />
-                          </Form.Group>
-                      </Col>
-                      <Col md={6}>
-                          <Form.Group className="mb-3" controlId="phone">
-                              <Form.Label>Phone number</Form.Label>
-                              <Form.Control type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} />
-                          </Form.Group>
-                      </Col>
-                  </Row>
-                  <Form.Group className="mb-3" controlId="address">
-                      <Form.Label>Address</Form.Label>
-                      <Form.Control as="textarea" rows={2} value={address} onChange={(e) => setAddress(e.target.value)} />
-                  </Form.Group>
-                  <Row>
-                      <Col md={6}>
-                          <Form.Group className="mb-3" controlId="location">
-                              <Form.Label>Location</Form.Label>
-                              <Form.Control type="text" placeholder="City, State, etc." value={locationField} onChange={(e) => setLocationField(e.target.value)} />
-                          </Form.Group>
-                      </Col>
-                      <Col md={6}>
-                          <Form.Group className="mb-3" controlId="password">
-                              <Form.Label>New Password (Optional)</Form.Label>
-                              <Form.Control type="password" placeholder="Leave blank to keep same" value={password} onChange={(e) => setPassword(e.target.value)} />
-                          </Form.Group>
-                      </Col>
-                  </Row>
-                  <div className="d-flex justify-content-end gap-2 mt-2">
-                      <Button variant="light" className="rounded-pill px-3" onClick={() => setIsEditingProfile(false)}>Close</Button>
-                      <Button type="submit" variant="primary" className="rounded-pill px-4" disabled={updateLoading}>
-                          {updateLoading ? 'Saving…' : 'Save Changes'}
-                      </Button>
-                  </div>
+                <Row>
+                  <Col md={6}>
+                    <Form.Group className="mb-3" controlId="name">
+                      <Form.Label>Name</Form.Label>
+                      <Form.Control type="text" value={name} onChange={(e) => setName(e.target.value)} />
+                    </Form.Group>
+                  </Col>
+                  <Col md={6}>
+                    <Form.Group className="mb-3" controlId="phone">
+                      <Form.Label>Phone number</Form.Label>
+                      <Form.Control type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} />
+                    </Form.Group>
+                  </Col>
+                </Row>
+                <Form.Group className="mb-3" controlId="address">
+                  <Form.Label>Address</Form.Label>
+                  <Form.Control as="textarea" rows={2} value={address} onChange={(e) => setAddress(e.target.value)} />
+                </Form.Group>
+                <Row>
+                  <Col md={6}>
+                    <Form.Group className="mb-3" controlId="location">
+                      <Form.Label>Location</Form.Label>
+                      <Form.Control type="text" placeholder="City, State, etc." value={locationField} onChange={(e) => setLocationField(e.target.value)} />
+                    </Form.Group>
+                  </Col>
+                  <Col md={6}>
+                    <Form.Group className="mb-3" controlId="password">
+                      <Form.Label>New Password (Optional)</Form.Label>
+                      <Form.Control type="password" placeholder="Leave blank to keep same" value={password} onChange={(e) => setPassword(e.target.value)} />
+                    </Form.Group>
+                  </Col>
+                </Row>
+                <div className="d-flex justify-content-end gap-2 mt-2">
+                  <Button variant="light" className="rounded-pill px-3" onClick={() => setIsEditingProfile(false)}>Close</Button>
+                  <Button type="submit" variant="primary" className="rounded-pill px-4" disabled={updateLoading}>
+                    {updateLoading ? 'Saving…' : 'Save Changes'}
+                  </Button>
+                </div>
               </Form>
             </div>
           )}
@@ -284,7 +306,7 @@ function ProfileScreen() {
 
       <Row className="g-3 mb-4 ky-dashboard-stats">
         <Col xs={12} sm={4}>
-          <Card className="ky-dashboard-stat border-0 h-100">
+          <Card className="ky-dashboard-stat border-0 h-100 fade-in-up delay-100">
             <Card.Body>
               <div className="ky-dashboard-stat-icon ky-dashboard-stat-icon--bookings" aria-hidden>
                 <i className="fas fa-calendar-check" />
@@ -297,7 +319,7 @@ function ProfileScreen() {
           </Card>
         </Col>
         <Col xs={12} sm={4}>
-          <Card className="ky-dashboard-stat border-0 h-100">
+          <Card className="ky-dashboard-stat border-0 h-100 fade-in-up delay-200">
             <Card.Body>
               <div className="ky-dashboard-stat-icon ky-dashboard-stat-icon--tools" aria-hidden>
                 <i className="fas fa-tractor" />
@@ -310,7 +332,7 @@ function ProfileScreen() {
           </Card>
         </Col>
         <Col xs={12} sm={4}>
-          <Card className="ky-dashboard-stat border-0 h-100">
+          <Card className="ky-dashboard-stat border-0 h-100 fade-in-up delay-300">
             <Card.Body>
               <div className="ky-dashboard-stat-icon ky-dashboard-stat-icon--pending" aria-hidden>
                 <i className="fas fa-bell" />
@@ -323,6 +345,17 @@ function ProfileScreen() {
           </Card>
         </Col>
       </Row>
+
+      {relistMessage && (
+        <Alert variant="success" className="mb-3 ky-dashboard-alert border-0 rounded-3">
+          {relistMessage}
+        </Alert>
+      )}
+      {relistError && (
+        <Alert variant="danger" className="mb-3 ky-dashboard-alert border-0 rounded-3">
+          {relistError}
+        </Alert>
+      )}
 
       <Card className="ky-dashboard-panel border-0">
         <Card.Body className="p-0">
@@ -341,13 +374,13 @@ function ProfileScreen() {
                   renderEmptyState(
                     "You haven’t booked any equipment yet",
                     'Browse tools',
-                    () => navigate('/')
+                    () => navigate('/browse')
                   )
                 ) : (
                   <Row xs={1} md={2} lg={3} className="g-4">
-                    {bookings.map((booking) => (
+                    {bookings.map((booking, index) => (
                       <Col key={booking.id}>
-                        <Card className="ky-dashboard-stat ky-dashboard-stat--detail h-100">
+                        <Card className={`ky-dashboard-stat ky-dashboard-stat--detail h-100 fade-in-up delay-${100 + (index % 6) * 50}`}>
                           <Card.Body className="d-flex flex-column">
                             <div className="ky-dashboard-stat-head">
                               <div
@@ -369,7 +402,7 @@ function ProfileScreen() {
                                 {new Date(booking.end_date).toLocaleDateString()}
                               </div>
                             </div>
-                            <div className="ky-dashboard-stat-footer">
+                            <div className="ky-dashboard-stat-footer d-flex gap-2 flex-wrap align-items-center">
                               <span className="ky-dashboard-stat-price">₹{booking.total_price}</span>
                               <Button
                                 variant="outline-primary"
@@ -379,6 +412,16 @@ function ProfileScreen() {
                               >
                                 View tool
                               </Button>
+                              {booking.status === 'EXPIRED' && (
+                                <Button
+                                  variant="warning"
+                                  size="sm"
+                                  className="rounded-pill"
+                                  onClick={() => navigate(`/tools/${booking.tool?.id}`)}
+                                >
+                                  Rebook
+                                </Button>
+                              )}
                             </div>
                           </Card.Body>
                         </Card>
@@ -403,9 +446,9 @@ function ProfileScreen() {
                   )
                 ) : (
                   <Row xs={1} md={2} lg={3} className="g-4">
-                    {tools.map((tool) => (
+                    {tools.map((tool, index) => (
                       <Col key={tool.id}>
-                        <Card className="ky-dashboard-stat ky-dashboard-stat--detail h-100">
+                        <Card className={`ky-dashboard-stat ky-dashboard-stat--detail h-100 fade-in-up delay-${100 + (index % 6) * 50}`}>
                           <Card.Body className="d-flex flex-column">
                             <div className="ky-dashboard-stat-head">
                               <div
@@ -489,9 +532,9 @@ function ProfileScreen() {
                   renderEmptyState('When renters request your tools, they’ll show up here.')
                 ) : (
                   <Row xs={1} md={2} lg={3} className="g-4">
-                    {toolBookings.map((booking) => (
+                    {toolBookings.map((booking, index) => (
                       <Col key={booking.id}>
-                        <Card className="ky-dashboard-stat ky-dashboard-stat--detail h-100">
+                        <Card className={`ky-dashboard-stat ky-dashboard-stat--detail h-100 fade-in-up delay-${100 + (index % 6) * 50}`}>
                           <Card.Body className="d-flex flex-column">
                             <div className="ky-dashboard-stat-head">
                               <div
@@ -549,14 +592,16 @@ function ProfileScreen() {
                                   </Button>
                                 </div>
                               ) : (
-                                <Button
-                                  variant="outline-secondary"
-                                  size="sm"
-                                  className="rounded-pill align-self-end"
-                                  onClick={() => navigate(`/tools/${booking.tool?.id}`)}
-                                >
-                                  View tool
-                                </Button>
+                                <div className="d-flex flex-wrap gap-2 justify-content-end">
+                                  <Button
+                                    variant="outline-secondary"
+                                    size="sm"
+                                    className="rounded-pill"
+                                    onClick={() => navigate(`/tools/${booking.tool?.id}`)}
+                                  >
+                                    View tool
+                                  </Button>
+                                </div>
                               )}
                             </div>
                           </Card.Body>

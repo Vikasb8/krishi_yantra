@@ -21,7 +21,7 @@ function RegisterScreen() {
   const { loading, error, userInfo } = userRegister;
 
   const redirectTo =
-    typeof location.state?.from === 'string' ? location.state.from : '/';
+    typeof location.state?.from === 'string' ? location.state.from : '/browse';
 
   useEffect(() => {
     if (userInfo) {
@@ -139,6 +139,7 @@ function RegisterScreen() {
             </Form.Group>
 
             <Button type="submit" variant="primary" disabled={loading}>
+              <i className="fas fa-user-plus me-2" aria-hidden />
               Register
             </Button>
           </Form>

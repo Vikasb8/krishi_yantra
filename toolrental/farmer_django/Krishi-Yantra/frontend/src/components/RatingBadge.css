@@ -1,0 +1,18 @@
+.rating-badge {
+  display: inline-block;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: default;
+  white-space: nowrap;
+}
+
+.rating-badge.clickable {
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.rating-badge.clickable:hover {
+  transform: scale(1.05);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}

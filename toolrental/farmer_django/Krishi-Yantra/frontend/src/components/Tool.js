@@ -2,6 +2,7 @@ import React from 'react';
 import { Card, Badge } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
 import Rating from './Rating';
+import RatingBadge from './RatingBadge';
 
 function Tool({ tool }) {
   const qty = tool.quantity ?? 1;
@@ -34,11 +35,37 @@ function Tool({ tool }) {
             </Badge>
           )}
         </div>
+        {tool.owner_details && (
+          <div className="ky-card-owner">
+            <i className="fas fa-user-circle" />
+            <span>
+              by{' '}
+              <strong>{tool.owner_details.name || tool.owner_details.username || 'Owner'}</strong>
+            </span>
+            {tool.owner_details.location && (
+              <>
+                <span className="ky-card-owner-dot">&middot;</span>
+                <span className="ky-card-owner-loc">
+                  <i className="fas fa-map-marker-alt" />
+                  {tool.owner_details.location}
+                </span>
+              </>
+            )}
+          </div>
+        )}
         {qty > 1 && (
           <div className="text-muted small mb-1">{qty} units in stock</div>
         )}
-        <div className="my-2">
-          <Rating value={tool.condition_rating} color="#ca8a04" />
+        <div className="my-2 d-flex align-items-center gap-2">
+          <Rating value={tool.average_rating || 0} color="#ca8a04" />
+          {tool.review_count > 0 ? (
+            <RatingBadge 
+              averageRating={tool.average_rating} 
+              reviewCount={tool.review_count || 0} 
+            />
+          ) : (
+            <span className="small text-muted">No reviews yet</span>
+          )}
         </div>
         <div className="mt-auto pt-2 d-flex align-items-baseline justify-content-between">
           <span className="price-tag">₹{tool.price_per_day}</span>

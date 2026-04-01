@@ -37,7 +37,7 @@ function Header() {
           <Navbar.Toggle aria-controls="main-nav" />
           <Navbar.Collapse id="main-nav">
             <Nav className="ms-auto align-items-lg-center flex-wrap gap-1 gap-lg-2 ky-navbar-nav">
-              <LinkContainer to="/">
+              <LinkContainer to="/browse">
                 <Nav.Link>
                   <i className="fas fa-tractor me-1" aria-hidden />
                   Browse tools
