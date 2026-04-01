@@ -180,7 +180,7 @@ function ToolScreen() {
 
       dispatch(listToolDetails(tool.id));
       setBookingFeedback({ variant: 'success', text: 'Request sent. The owner will review your dates.' });
-      setTimeout(() => navigate('/browse'), 900);
+      setTimeout(() => navigate('/'), 900);
     } catch (err) {
       const message =
         err.response && err.response.data.detail
@@ -356,52 +356,6 @@ function ToolScreen() {
                 </div>
               </Card.Body>
             </Card>
-
-            {/* Owner info card */}
-            {tool.owner_details && (
-              <Card className="ky-detail-card ky-owner-card fade-in-up delay-250">
-                <Card.Body>
-                  <h2 className="ky-section-title">
-                    <i className="fas fa-user-circle" aria-hidden />
-                    Listed by
-                  </h2>
-                  <div className="ky-owner-info">
-                    <div className="ky-owner-avatar-lg">
-                      {tool.owner_details.profile_image ? (
-                        <img src={tool.owner_details.profile_image} alt={tool.owner_details.name || 'Owner'} />
-                      ) : (
-                        <span>
-                          {(tool.owner_details.name || tool.owner_details.username || '?').charAt(0).toUpperCase()}
-                        </span>
-                      )}
-                    </div>
-                    <div className="ky-owner-meta">
-                      <div className="ky-owner-name-lg">
-                        {tool.owner_details.name || tool.owner_details.username || 'Owner'}
-                      </div>
-                      {tool.owner_details.location && (
-                        <div className="ky-owner-location">
-                          <i className="fas fa-map-marker-alt" />
-                          {tool.owner_details.location}
-                        </div>
-                      )}
-                      {tool.owner_details.email && (
-                        <div className="ky-owner-contact">
-                          <i className="fas fa-envelope" />
-                          <a href={`mailto:${tool.owner_details.email}`}>{tool.owner_details.email}</a>
-                        </div>
-                      )}
-                      {tool.owner_details.phone_number && (
-                        <div className="ky-owner-contact">
-                          <i className="fas fa-phone" />
-                          <a href={`tel:${tool.owner_details.phone_number}`}>{tool.owner_details.phone_number}</a>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                </Card.Body>
-              </Card>
-            )}
           </Col>
 
           <Col lg={12}>

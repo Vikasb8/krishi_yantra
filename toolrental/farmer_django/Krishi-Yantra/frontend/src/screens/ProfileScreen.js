@@ -374,7 +374,7 @@ function ProfileScreen() {
                   renderEmptyState(
                     "You haven’t booked any equipment yet",
                     'Browse tools',
-                    () => navigate('/browse')
+                    () => navigate('/')
                   )
                 ) : (
                   <Row xs={1} md={2} lg={3} className="g-4">
